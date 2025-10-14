@@ -130,15 +130,15 @@ class Player {
     die() {
         if (this.invincibleTimer > 0 || this.shieldTimer > 0) return; // Bất tử hoặc có khiên thì không chết
         this.isAlive = false;
-        this.shakeTimer = 0.3; // Rung màn hình trong 0.3 giây
-        this.respawnTimer = 10; // Hồi sinh sau 10 giây
+        this.shakeTimer = GAME_CONFIG.SHAKE_DURATION;
+        this.respawnTimer = GAME_CONFIG.RESPAWN_TIME;
     }
 
     // Hồi sinh người chơi
     respawn() {
         this.isAlive = true;
         this.lane = 2; // Về làn giữa
-        this.invincibleTimer = 3; // Bất tử trong 3 giây
+        this.invincibleTimer = GAME_CONFIG.INVINCIBLE_TIME_AFTER_RESPAWN;
         this.rotation = 0;
         this.combo = 0;
         this.comboTimer = 0;
@@ -165,8 +165,8 @@ class Player {
         let shakeX = 0;
         let shakeY = 0;
         if (this.shakeTimer > 0) {
-            shakeX = (Math.random() - 0.5) * this.shakeIntensity;
-            shakeY = (Math.random() - 0.5) * this.shakeIntensity;
+            shakeX = (Math.random() - 0.5) * GAME_CONFIG.SHAKE_INTENSITY;
+            shakeY = (Math.random() - 0.5) * GAME_CONFIG.SHAKE_INTENSITY;
         }
         // Di chuyển gốc tọa độ đến tâm của chiếc xe để xoay quanh tâm
         ctx.translate(this.x + this.w / 2 + shakeX, this.y + this.h / 2 + shakeY);
@@ -384,6 +384,31 @@ class FloatingText {
     }
 }
 
+// --- CÁC HẰNG SỐ VÀ CẤU HÌNH GAME ---
+const GAME_CONFIG = {
+    // Player
+    RESPAWN_TIME: 10,
+    INVINCIBLE_TIME_AFTER_RESPAWN: 3,
+    // Power-ups
+    SHIELD_DURATION: 7,
+    MAGNET_DURATION: 8,
+    // Scoring
+    COIN_BASE_SCORE: 100,
+    NEAR_MISS_BONUS: 25,
+    // Combo
+    COMBO_DURATION: 2.0,
+    COMBO_SCORE_MULTIPLIER_STEP: 5, // Tăng điểm mỗi 5 combo
+    // Gameplay
+    INITIAL_FALL_SPEED: 300,
+    FALL_SPEED_INCREASE_RATE: 0.1,
+    // Visuals
+    LANE_DASH_LENGTH: 40,
+    LANE_DASH_GAP: 20,
+    ROAD_OFFSET_LOOP: 60, // (LANE_DASH_LENGTH + LANE_DASH_GAP)
+    SHAKE_DURATION: 0.3,
+    SHAKE_INTENSITY: 5,
+};
+
 // --- PHẦN KHỞI TẠO GAME CHÍNH ---
 
 // Lấy canvas và context để vẽ
@@ -405,9 +430,11 @@ let coins = [];
 let powerups = [];
 let particles = [];
 let floatingTexts = [];
-let fallSpeed = 300; // Tốc độ rơi (pixels/giây)
-let gameOver = false;
+let fallSpeed = GAME_CONFIG.INITIAL_FALL_SPEED;
+let gameState = 'menu'; // 'menu', 'playing', 'gameover'
 let lastTime = 0;
+let mousePos = { x: 0, y: 0 };
+let buttons = {};
 let roadOffset = 0; // Thêm: offset cho vạch kẻ đường
 
 // Mảng ma trận chướng ngại vật (chuyển từ Java)
@@ -512,8 +539,8 @@ async function loadAssets() {
         console.log("Tất cả hình ảnh đã được tải thành công!");
         // Sau khi tải xong, đưa các ảnh vật cản vào mảng riêng
         obstacleImages = [assets.obstacle_tree, assets.obstacle_log, assets.obstacle_pit, assets.obstacle_crate, assets.obstacle_rock];
-        initGame();
-        requestAnimationFrame(gameLoop);
+        setupUI(); // Sửa lỗi: Gọi hàm thiết lập UI sau khi tải xong assets
+        requestAnimationFrame(gameLoop); // Chỉ cần bắt đầu vòng lặp, game sẽ tự vào trạng thái 'menu'
     } catch (error) {
         console.error(error);
         // Hiển thị lỗi lên màn hình cho người dùng
@@ -524,6 +551,29 @@ async function loadAssets() {
     }
 }
 
+// --- HÀM THIẾT LẬP GIAO DIỆN (NÚT BẤM) ---
+function setupUI() {
+    const buttonWidth = 300;
+    const buttonHeight = 60;
+    const centerX = canvas.width / 2;
+
+    buttons.mainMenu = {
+        start: {
+            rect: { x: centerX - buttonWidth / 2, y: canvas.height / 2 + 20, w: buttonWidth, h: buttonHeight },
+            text: 'Start Game'
+        }
+    };
+    buttons.gameOver = {
+        restart: {
+            rect: { x: centerX - buttonWidth / 2, y: canvas.height / 2 + 60, w: buttonWidth, h: buttonHeight },
+            text: 'Restart'
+        },
+        menu: {
+            rect: { x: centerX - buttonWidth / 2, y: canvas.height / 2 + 130, w: buttonWidth, h: buttonHeight },
+            text: 'Main Menu'
+        }
+    };
+}
 // --- LOGIC KHỞI TẠO VÀ CHƠI LẠI ---
 
 function initGame() {
@@ -538,7 +588,7 @@ function initGame() {
         };
         players.push(new Player(i, GROUND_Y, LANE_WIDTH, assets.player, viewport));
         // Cho người chơi 3 giây bất tử khi bắt đầu để tránh thua ngay lập tức
-        players[i].invincibleTimer = 3; 
+        players[i].invincibleTimer = GAME_CONFIG.INVINCIBLE_TIME_AFTER_RESPAWN; 
     }
 
     // Reset các biến
@@ -547,9 +597,10 @@ function initGame() {
     powerups = [];
     particles = [];
     floatingTexts = [];
-    gameOver = false; 
-    fallSpeed = 300;
+    gameState = 'playing'; 
+    fallSpeed = GAME_CONFIG.INITIAL_FALL_SPEED;
     lastTime = 0;
+
     // Sinh ra loạt vật cản đầu tiên
     spawnObstaclePattern();
 }
@@ -581,9 +632,15 @@ function spawnObstaclePattern() {
 // --- VÒNG LẶP GAME CHÍNH ---
 
 function gameLoop(timestamp) {
-    if (gameOver) {
+    if (gameState === 'gameover') {
         drawGameOver();
         return; // Dừng vòng lặp nếu game over
+    }
+
+    if (gameState === 'menu') {
+        drawMainMenu();
+        requestAnimationFrame(gameLoop);
+        return;
     }
 
     // Tính toán delta time (dt) - thời gian giữa các khung hình
@@ -609,9 +666,9 @@ function update(dt) {
     players.forEach(p => p.update(dt));
 
     // Cập nhật offset cho đường chạy
-    roadOffset = (roadOffset + fallSpeed * (dt / 1000)) % 60;
+    roadOffset = (roadOffset + fallSpeed * (dt / 1000)) % GAME_CONFIG.ROAD_OFFSET_LOOP;
 
-    fallSpeed += 0.1; // Tăng tốc độ từ từ
+    fallSpeed += GAME_CONFIG.FALL_SPEED_INCREASE_RATE; // Tăng tốc độ từ từ
 
     // Cập nhật và xóa vật cản/coin đã ra khỏi màn hình
     for (let i = obstacles.length - 1; i >= 0; i--) {
@@ -651,15 +708,17 @@ function attractCoins(player, dt) {
 
     const playerCenterX = player.x + player.w / 2;
     const playerCenterY = player.y + player.h / 2;
+    const magnetRadius = 250;
+    const attractionSpeed = 5;
+    const dtSeconds = dt / 1000;
 
     coins.forEach(coin => {
         const coinCenterX = coin.x + coin.size / 2;
         // Chỉ hút các coin ở gần
         const distance = Math.hypot(playerCenterX - coinCenterX, playerCenterY - coin.y);
-        if (distance < 250) { // Bán kính hút là 250px
-            const dtSeconds = dt / 1000;
-            coin.y += (playerCenterY - coin.y) * 5 * dtSeconds;
-            coin.x += (playerCenterX - coinCenterX) * 5 * dtSeconds;
+        if (distance < magnetRadius) {
+            coin.y += (playerCenterY - coin.y) * attractionSpeed * dtSeconds;
+            coin.x += (playerCenterX - coinCenterX) * attractionSpeed * dtSeconds;
         }
     });
 }
@@ -688,7 +747,7 @@ function draw() {
         // Thêm: Vẽ vạch kẻ đường chuyển động
         ctx.strokeStyle = '#777'; // Giảm độ sáng của vạch để đỡ chói
         ctx.lineWidth = 4;
-        ctx.setLineDash([40, 20]); // Thay đổi: vạch dài hơn (40px), khoảng trống ngắn hơn (20px)
+        ctx.setLineDash([GAME_CONFIG.LANE_DASH_LENGTH, GAME_CONFIG.LANE_DASH_GAP]);
         for (let i = 1; i < LANE_COUNT; i++) {
             ctx.beginPath();
             ctx.lineDashOffset = -roadOffset; // Di chuyển vạch theo tốc độ chung
@@ -774,14 +833,47 @@ function draw() {
     floatingTexts.forEach(t => t.draw(ctx));
 }
 
+function drawMainMenu() {
+    // Vẽ nền tối
+    ctx.fillStyle = 'rgb(30, 32, 40)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Vẽ chữ
+    drawNeonText(ctx, 'Racing Car', canvas.width / 2, canvas.height / 2 - 100, "60px 'Press Start 2P'", '#fff', '#00ffff');
+
+    // Vẽ nút Start
+    if (buttons.mainMenu && buttons.mainMenu.start) {
+        drawButton(ctx, buttons.mainMenu.start);
+    }
+}
+
 function drawGameOver() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Vẽ tiêu đề và điểm số
     drawNeonText(ctx, 'GAME OVER', canvas.width / 2, canvas.height / 2 - 80, "40px 'Press Start 2P'", '#fff', '#ff3333');
     drawNeonText(ctx, `Player 1 Score: ${Math.floor(players[0].score)}`, canvas.width / 2, canvas.height / 2 - 20, "22px 'Press Start 2P'", '#fff', '#00ffff');
     drawNeonText(ctx, `Player 2 Score: ${Math.floor(players[1].score)}`, canvas.width / 2, canvas.height / 2 + 30, "22px 'Press Start 2P'", '#fff', '#00ffff');
-    drawNeonText(ctx, 'Press Enter to Restart', canvas.width / 2, canvas.height / 2 + 80, "16px 'Press Start 2P'", '#eee', '#888');
+
+    // Vẽ các nút
+    if (buttons.gameOver) {
+        drawButton(ctx, buttons.gameOver.restart);
+        drawButton(ctx, buttons.gameOver.menu);
+    }
+}
+
+// Hàm vẽ một nút bấm
+function drawButton(ctx, button) {
+    const { x, y, w, h } = button.rect;
+    const isHovered = isMouseInRect(mousePos, button.rect);
+
+    // Thay đổi màu sắc sang tông xanh lam
+    ctx.fillStyle = isHovered ? 'rgba(0, 150, 255, 0.4)' : 'rgba(0, 120, 200, 0.3)';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = isHovered ? '#00ffff' : '#00aaff';
+    ctx.strokeRect(x, y, w, h);
+    drawNeonText(ctx, button.text, x + w / 2, y + h / 2 + 8, "20px 'Press Start 2P'", isHovered ? '#fff' : '#ccc', isHovered ? '#00ffff' : '#00aaff');
 }
 
 // --- VA CHẠM VÀ ĐIỀU KHIỂN ---
@@ -822,9 +914,9 @@ function checkCollisions() {
             const coinRect = coin.getRect(LANE_WIDTH);
             if (rectsIntersect(playerRect, coinRect)) {
                 player.combo++;
-                player.comboPulse = 1.6; // Kích hoạt hiệu ứng phóng to
-                player.comboTimer = 2.0; // Reset thời gian duy trì combo
-                const scoreGained = 100 * Math.floor(1 + player.combo / 5); // Điểm tăng theo combo
+                player.comboPulse = 1.6;
+                player.comboTimer = GAME_CONFIG.COMBO_DURATION;
+                const scoreGained = GAME_CONFIG.COIN_BASE_SCORE * Math.floor(1 + player.combo / GAME_CONFIG.COMBO_SCORE_MULTIPLIER_STEP);
                 player.score += scoreGained;
 
                 // Tạo hiệu ứng chữ bay
@@ -851,9 +943,9 @@ function checkCollisions() {
             const powerupRect = powerup.getRect(LANE_WIDTH);
             if (rectsIntersect(playerRect, powerupRect)) {
                 if (powerup.type === 'shield') {
-                    player.shieldTimer = 7; // Kích hoạt khiên trong 7 giây
+                    player.shieldTimer = GAME_CONFIG.SHIELD_DURATION;
                 } else if (powerup.type === 'magnet') {
-                    player.magnetTimer = 8; // Kích hoạt nam châm trong 8 giây
+                    player.magnetTimer = GAME_CONFIG.MAGNET_DURATION;
                 }
                 powerups.splice(i, 1);
             }
@@ -862,7 +954,7 @@ function checkCollisions() {
 
     // Sửa lỗi 2: Di chuyển logic kiểm tra game over ra ngoài vòng lặp player
     if (players.every(p => !p.isAlive)) {
-        gameOver = true;
+        gameState = 'gameover';
     }
 
 }
@@ -875,15 +967,21 @@ function rectsIntersect(r1, r2) {
              r2.y + r2.h < r1.y);
 }
 
+// Hàm kiểm tra xem chuột có nằm trong hình chữ nhật không
+function isMouseInRect(mouse, rect) {
+    return mouse.x > rect.x && mouse.x < rect.x + rect.w &&
+           mouse.y > rect.y && mouse.y < rect.y + rect.h;
+}
+
 // Hàm phụ trợ để trao thưởng "Né"
 function awardNearMiss(player) {
-    const bonus = 25;
+    const bonus = GAME_CONFIG.NEAR_MISS_BONUS;
     player.score += bonus;
 
     // Thêm combo khi né thành công
     player.combo++;
     player.comboPulse = 1.6; // Kích hoạt hiệu ứng phóng to
-    player.comboTimer = 2.0; // Reset thời gian duy trì combo
+    player.comboTimer = GAME_CONFIG.COMBO_DURATION;
     floatingTexts.push(new FloatingText(
         `+${bonus} Né!`,
         PLAYER_VIEW_WIDTH - 60,
@@ -911,13 +1009,8 @@ function drawNeonText(ctx, text, x, y, font, fillColor, glowColor, align = 'cent
 
 // Lắng nghe sự kiện bàn phím
 window.addEventListener('keydown', (e) => {
-    if (gameOver && e.key === 'Enter') {
-        initGame(); // Chơi lại khi game over
-        requestAnimationFrame(gameLoop);
-        return;
-    }
-
-    if (gameOver) return;
+    // Chỉ xử lý điều khiển xe khi đang chơi
+    if (gameState !== 'playing') return;
 
     // Điều khiển Player 1 (bên trái, dùng A/D)
     if (e.key === 'a' || e.key === 'A') {
@@ -931,6 +1024,34 @@ window.addEventListener('keydown', (e) => {
         players[1].moveLeft();
     } else if (e.key === 'ArrowRight') {
         players[1].moveRight();
+    }
+});
+
+// Lắng nghe sự kiện chuột
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mousePos.x = e.clientX - rect.left;
+    mousePos.y = e.clientY - rect.top;
+});
+
+canvas.addEventListener('click', (e) => {
+    if (gameState === 'menu') {
+        if (buttons.mainMenu && isMouseInRect(mousePos, buttons.mainMenu.start.rect)) {
+            initGame();
+            // Không cần gọi requestAnimationFrame vì vòng lặp menu vẫn đang chạy
+        }
+    } else if (gameState === 'gameover') {
+        if (buttons.gameOver) {
+            if (isMouseInRect(mousePos, buttons.gameOver.restart.rect)) {
+                initGame();
+                // Khởi động lại vòng lặp game đã bị dừng
+                requestAnimationFrame(gameLoop);
+            } else if (isMouseInRect(mousePos, buttons.gameOver.menu.rect)) {
+                gameState = 'menu';
+                // Khởi động lại vòng lặp game đã bị dừng
+                requestAnimationFrame(gameLoop);
+            }
+        }
     }
 });
 
