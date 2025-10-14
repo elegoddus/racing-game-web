@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Racing Car Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Racing Car</h1>
+    <canvas id="gameCanvas" width="900" height="800"></canvas>
+    <script>
+        // Đợi cho tất cả các font trong CSS được tải xong
+        document.fonts.ready.then(() => {
+            // Sau đó mới tải và chạy file game.js
+            const script = document.createElement('script');
+            script.src = 'game.js';
+            document.body.appendChild(script);
+        });
+    </script>
+</body>
+</html>
