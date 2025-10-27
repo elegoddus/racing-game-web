@@ -25,5 +25,10 @@ export default {
     pressKey: 'Nhấn một phím...',
     resetButton: 'Đặt lại',
     saveButton: 'Lưu',
-    closeButton: 'Đóng'
+    closeButton: 'Đóng',
+    gamePaused: 'Tạm Dừng',
+    endGame: 'Kết Thúc',
+    resume: 'Tiếp Tục',
+    bgmVolume: 'Âm lượng nhạc nền',
+    sfxVolume: 'Âm lượng hiệu ứng'
 };

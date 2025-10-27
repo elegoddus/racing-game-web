@@ -2,7 +2,7 @@
 
 // 1. Import tất cả các hình ảnh như các module
 import playerImg from '../assets/image/player.png';
-import coinImg from '../assets/image/coin.png';
+import coinImg from '../assets/image/coin3_16x16.png';
 import treeImg from '../assets/image/tree.png';
 import logImg from '../assets/image/log.png';
 import pitImg from '../assets/image/pit.png';

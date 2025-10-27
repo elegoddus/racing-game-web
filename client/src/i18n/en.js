@@ -25,5 +25,10 @@ export default {
     pressKey: 'Press a key...',
     resetButton: 'Reset',
     saveButton: 'Save',
-    closeButton: 'Close'
+    closeButton: 'Close',
+    gamePaused: 'Game Paused',
+    endGame: 'End Game',
+    resume: 'Resume',
+    bgmVolume: 'Music Volume',
+    sfxVolume: 'Effects Volume'
 };

@@ -1,14 +1,14 @@
 // --- LỚP PARTICLE (HIỆU ỨNG) ---
 export class Particle {
-    constructor(x, y, color) {
+    constructor(x, y, color, size = null, vx = null, vy = null, life = null) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 3;
-        this.vy = (Math.random() - 0.5) * 3 - 1; // Hơi bay lên
-        this.life = 20 + Math.random() * 20;
-        this.initialLife = this.life;
-        this.size = 2 + Math.random() * 4;
         this.color = color;
+        this.size = size !== null ? size : 2 + Math.random() * 4;
+        this.vx = vx !== null ? vx : (Math.random() - 0.5) * 3;
+        this.vy = vy !== null ? vy : (Math.random() - 0.5) * 3 - 1; // Hơi bay lên
+        this.life = life !== null ? life : 20 + Math.random() * 20;
+        this.initialLife = this.life;
     }
 
     update(dt) {

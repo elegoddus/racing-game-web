@@ -1,4 +1,5 @@
 import { GAME_CONFIG, LANE_COUNT } from '../config';
+import { playSFX } from '../audio.js';
 
 // --- LỚP PLAYER ---
 export class Player {
@@ -108,6 +109,7 @@ export class Player {
 
     moveLeft() {
         if (this.isAlive && this.lane > 0) {
+            playSFX('laneChange');
             this.previousLane = this.lane;
             this.lane--;
             this.lastLaneChangeTime = performance.now() / 1000;
@@ -117,6 +119,7 @@ export class Player {
 
     moveRight() {
         if (this.isAlive && this.lane < LANE_COUNT - 1) {
+            playSFX('laneChange');
             this.previousLane = this.lane;
             this.lane++;
             this.lastLaneChangeTime = performance.now() / 1000;
@@ -155,6 +158,7 @@ export class Player {
     }
 
     respawn() {
+        playSFX('start');
         this.isAlive = true;
         this.lane = 2;
         this.invincibleTimer = GAME_CONFIG.INVINCIBLE_TIME_AFTER_RESPAWN;

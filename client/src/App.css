@@ -33,6 +33,7 @@ body {
 /* Default (Vietnamese) */
 .lang-vi {
   font-family: 'Noto Sans', sans-serif;
+  font-size: 1.1rem; /* Larger base size */
 }
 .lang-vi h1 {
   font-family: 'Noto Sans', sans-serif;
@@ -43,13 +44,13 @@ body {
 .lang-vi .game-button {
   font-family: 'Noto Sans', sans-serif;
   text-transform: none;
-  font-size: 1.2rem; /* Increased size */
+  font-size: 1.4rem; /* Increased size again */
 }
 .lang-vi .game-button-small {
-  font-size: 0.9rem; /* Increased size */
+  font-size: 1.1rem; /* Increased size again */
 }
 .lang-vi .player-input label {
-  font-size: 1.4rem; /* Increased size */
+  font-size: 1.5rem; /* Increased size again */
 }
 
 /* English */
@@ -155,4 +156,10 @@ canvas {
   padding: 10px 12px;
   font-size: 0.7rem;
   border-bottom-width: 4px;
+}
+
+.lang-en .player-input label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem; /* Adjust size for pixel font readability */
+  line-height: 1; /* Adjust line-height for better alignment */
 }
