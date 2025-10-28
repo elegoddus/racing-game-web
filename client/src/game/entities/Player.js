@@ -109,7 +109,7 @@ export class Player {
 
     moveLeft() {
         if (this.isAlive && this.lane > 0) {
-            playSFX('laneChange');
+            playSFX('laneChange', { playbackRate: 2.0 });
             this.previousLane = this.lane;
             this.lane--;
             this.lastLaneChangeTime = performance.now() / 1000;
@@ -119,7 +119,7 @@ export class Player {
 
     moveRight() {
         if (this.isAlive && this.lane < LANE_COUNT - 1) {
-            playSFX('laneChange');
+            playSFX('laneChange', { playbackRate: 2.0 });
             this.previousLane = this.lane;
             this.lane++;
             this.lastLaneChangeTime = performance.now() / 1000;

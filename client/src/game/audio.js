@@ -37,10 +37,11 @@ export const loadAudio = () => {
     }
 };
 
-export const playSFX = (name) => {
+export const playSFX = (name, options = {}) => {
     if (isMuted || !sfxAudio[name]) return;
     sfxAudio[name].currentTime = 0;
-    sfxAudio[name].volume = sfxVolume; // Ensure volume is up-to-date
+    sfxAudio[name].volume = sfxVolume;
+    sfxAudio[name].playbackRate = options.playbackRate || 1.0;
     sfxAudio[name].play().catch(e => console.error("Error playing SFX:", e));
 };
 
