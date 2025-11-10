@@ -2,10 +2,10 @@
 
 // 1. Import tất cả các hình ảnh như các module
 import playerImg from '../assets/image/player.png';
-import coinImg from '../assets/image/coin3_16x16.png';
+import coinImg from '../assets/image/coin_sprite.png';
 import treeImg from '../assets/image/tree.png';
 import logImg from '../assets/image/log.png';
-import pitImg from '../assets/image/pit.png';
+import pitImg from '../assets/image/pit1.png';
 import crateImg from '../assets/image/crate.png';
 import rockImg from '../assets/image/rock.png';
 import shieldImg from '../assets/image/shield.png';
@@ -59,7 +59,7 @@ function loadAsset(key, src) {
                 } else {
                     processedImage = processImageTransparency(img, {r: 255, g: 255, b: 255});
                 }
-            } else if (key === 'player' || key.startsWith('powerup_') || key === 'shield_effect') {
+            } else if (key === 'player' || key.startsWith('powerup_') || key === 'shield_effect' || key === 'coin') {
                 processedImage = processImageTransparency(img, {r: 255, g: 255, b: 255});
             }
             resolve({ key, image: processedImage });

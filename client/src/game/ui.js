@@ -5,12 +5,12 @@ function drawButton(ctx, button, mousePos) {
     const { x, y, w, h } = button.rect;
     const isHovered = isMouseInRect(mousePos, button.rect);
 
-    ctx.fillStyle = isHovered ? 'rgba(0, 150, 255, 0.4)' : 'rgba(0, 120, 200, 0.3)';
+    ctx.fillStyle = isHovered ? 'rgba(138, 43, 226, 0.5)' : 'rgba(138, 43, 226, 0.3)';
     ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = isHovered ? '#00ffff' : '#00aaff';
+    ctx.strokeStyle = isHovered ? '#BF00FF' : '#9400D3';
     ctx.strokeRect(x, y, w, h);
     let label = button.text || t(button.textKey);
-    drawNeonText(ctx, label, x + w / 2, y + h / 2 + 8, 20, isHovered ? '#fff' : '#ccc', isHovered ? '#00ffff' : '#00aaff');
+    drawNeonText(ctx, label, x + w / 2, y + h / 2 + 8, 20, isHovered ? '#fff' : '#ccc', isHovered ? '#BF00FF' : '#9400D3');
 }
 
 export function setupUI(canvas) {
@@ -21,9 +21,10 @@ export function setupUI(canvas) {
     const buttons = {};
 
     // Main Menu Buttons
+    const mainMenuButtonWidth = 140;
     buttons.mainMenu = {
-        start: { rect: { x: centerX - buttonWidth / 2, y: canvas.height / 2 + 20, w: buttonWidth, h: buttonHeight }, textKey: 'start' },
-        settings: { rect: { x: centerX - buttonWidth / 2, y: canvas.height / 2 + 100, w: buttonWidth, h: buttonHeight }, textKey: 'settings' }
+        start: { rect: { x: centerX - mainMenuButtonWidth - 10, y: canvas.height / 2 + 60, w: mainMenuButtonWidth, h: buttonHeight }, textKey: 'start' },
+        settings: { rect: { x: centerX + 10, y: canvas.height / 2 + 60, w: mainMenuButtonWidth, h: buttonHeight }, textKey: 'settings' }
     };
 
     // In-Game App Buttons
@@ -60,9 +61,9 @@ export function setupUI(canvas) {
 }
 
 export function drawMainMenu(ctx, buttons, mousePos, canvas) {
-    ctx.fillStyle = 'rgb(30, 32, 40)';
+    ctx.fillStyle = 'rgb(40, 30, 50)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawNeonText(ctx, 'Racing Car', canvas.width / 2, canvas.height / 2 - 100, 60, '#fff', '#00ffff');
+    drawNeonText(ctx, 'Racing Car', canvas.width / 2, canvas.height / 2 - 100, 60, '#fff', '#BF00FF');
     if (buttons.mainMenu) {
         drawButton(ctx, buttons.mainMenu.start, mousePos);
         drawButton(ctx, buttons.mainMenu.settings, mousePos);
@@ -111,7 +112,9 @@ export function drawGameOver(ctx, players, leaderboardData, buttons, mousePos, c
     drawNeonText(ctx, t('gameOver'), canvas.width / 2, 120, 40, '#fff', '#ff3333');
     if (players && players.length > 0) {
         drawNeonText(ctx, t('playerScore', { n: 1, score: Math.floor(players[0].score) }), canvas.width / 2, 180, 22, '#fff', '#00ffff');
-        drawNeonText(ctx, t('playerScore', { n: 2, score: Math.floor(players[1].score) }), canvas.width / 2, 220, 22, '#fff', '#00ffff');
+        if (players[1]) {
+            drawNeonText(ctx, t('playerScore', { n: 2, score: Math.floor(players[1].score) }), canvas.width / 2, 220, 22, '#fff', '#00ffff');
+        }
     }
     drawNeonText(ctx, t('leaderboard'), canvas.width / 2, 280, 20, '#fff', '#ffff00');
     if (leaderboardData && leaderboardData.length > 0) {

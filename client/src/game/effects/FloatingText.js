@@ -24,7 +24,7 @@ export class FloatingText {
 
         if (this.pulseFrequency > 0) {
             this.pulseTimer += dtSeconds;
-            const pulseAmount = Math.sin(this.pulseTimer * this.pulseFrequency) * (this.initialSize * 0.2); // Pulse by 20% of original size
+            const pulseAmount = Math.sin(this.pulseTimer * this.pulseFrequency) * (this.initialSize * 0.2);
             this.size = this.initialSize + pulseAmount;
         }
     }
@@ -40,7 +40,6 @@ export class FloatingText {
             shakeY = (Math.random() - 0.5) * this.shakeIntensity;
         }
         
-        // Apply rotation and translation
         ctx.translate(this.x + shakeX, this.y + shakeY);
         ctx.rotate(this.rotation);
         
@@ -48,7 +47,6 @@ export class FloatingText {
         const fillColor = `rgba(${this.color}, ${alpha})`;
         const glowColor = `rgba(255, 255, 255, ${alpha * 0.5})`;
         
-        // Draw text at the new rotated origin (0,0)
         drawNeonText(ctx, this.text, 0, 0, this.size, fillColor, glowColor, 'center', 2);
         
         ctx.restore();

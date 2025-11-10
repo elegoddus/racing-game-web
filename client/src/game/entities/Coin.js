@@ -8,7 +8,7 @@ export class Coin {
         this.x = this.lane * laneWidth + (laneWidth - this.size) / 2;
 
         // Animation properties
-        this.frameCount = 14; // Assume 9 frames in the sprite sheet
+        this.frameCount = 14; // Assume 14 frames in the sprite sheet
         this.currentFrame = 0;
         this.animationTimer = 0;
         this.animationSpeed = 1 / 12; // 12 frames per second
@@ -35,7 +35,7 @@ export class Coin {
         }
     }
 
-    draw(ctx) {
+    draw(ctx, laneWidth) { // laneWidth is not used here but kept for consistency
         const sx = this.currentFrame * this.frameWidth;
         const sy = 0;
         ctx.drawImage(

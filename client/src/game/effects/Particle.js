@@ -1,4 +1,3 @@
-// --- LỚP PARTICLE (HIỆU ỨNG) ---
 export class Particle {
     constructor(x, y, color, size = null, vx = null, vy = null, life = null) {
         this.x = x;
@@ -6,7 +5,7 @@ export class Particle {
         this.color = color;
         this.size = size !== null ? size : 2 + Math.random() * 4;
         this.vx = vx !== null ? vx : (Math.random() - 0.5) * 3;
-        this.vy = vy !== null ? vy : (Math.random() - 0.5) * 3 - 1; // Hơi bay lên
+        this.vy = vy !== null ? vy : (Math.random() - 0.5) * 3 - 1;
         this.life = life !== null ? life : 20 + Math.random() * 20;
         this.initialLife = this.life;
     }
@@ -14,7 +13,7 @@ export class Particle {
     update(dt) {
         this.x += this.vx;
         this.y += this.vy;
-        this.life -= (dt / 16); // Giảm life theo dt
+        this.life -= (dt / 16);
     }
 
     draw(ctx) {

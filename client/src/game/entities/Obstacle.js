@@ -1,4 +1,3 @@
-// --- LỚP OBSTACLE ---
 export class Obstacle {
     constructor(lane, y, w, h, image) {
         this.lane = lane;
@@ -6,7 +5,7 @@ export class Obstacle {
         this.w = w;
         this.h = h;
         this.image = image;
-        this.isNearMiss = false;
+        this.nearMissedBy = [];
     }
     update(fallSpeed, dt) {
         this.y += fallSpeed * (dt / 1000);
