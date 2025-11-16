@@ -422,6 +422,8 @@ function App() {
           activeControls={controlsForGame}
           myPlayerIndex={myPlayerIndex}
           settings={settings}
+          mode={isMultiplayerGame ? 'multi' : 'solo'}
+          socket={socket}
         />
       </div>
     );

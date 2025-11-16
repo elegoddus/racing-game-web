@@ -49,7 +49,9 @@ export class Game {
         this.obstacleImages = [];
         this.scoresSent = false;
 
-        this.PLAYER_VIEW_WIDTH = (this.canvas.width - GAME_CONFIG.VIEWPORT_GAP) / (this.mode === 'solo' ? 1 : PLAYER_COUNT);
+        const playerCount = this.mode === 'solo' ? this.numPlayers : PLAYER_COUNT;
+        const totalGap = GAME_CONFIG.VIEWPORT_GAP * (playerCount > 1 ? playerCount - 1 : 0);
+        this.PLAYER_VIEW_WIDTH = (this.canvas.width - totalGap) / playerCount;
         this.LANE_WIDTH = this.PLAYER_VIEW_WIDTH / LANE_COUNT;
         this.GROUND_Y = this.canvas.height;
         this.gameId = `${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
@@ -581,13 +583,10 @@ export class Game {
                 player.draw(this.ctx, this.assets);
             }
             
-            // In multiplayer, obstacles/coins are global, not per-player
-            // We need to draw them relative to the current viewport
-            if (this.mode === 'multi') {
-                 this.obstacles.forEach(o => o.draw(this.ctx, this.LANE_WIDTH));
-                 this.coins.forEach(c => c.draw(this.ctx, this.LANE_WIDTH));
-                 this.powerups.forEach(p => p.draw(this.ctx, this.LANE_WIDTH));
-            }
+            // Draw obstacles, coins, and powerups inside the viewport
+            this.obstacles.forEach(o => o.draw(this.ctx, this.LANE_WIDTH));
+            this.coins.forEach(c => c.draw(this.ctx, this.LANE_WIDTH));
+            this.powerups.forEach(p => p.draw(this.ctx, this.LANE_WIDTH));
 
             // Draw UI
             if (player) {
@@ -604,14 +603,11 @@ export class Game {
             this.ctx.restore();
         }
         
-        // In solo mode, entities are drawn per-player viewport
+        // Draw combo effect for solo mode (as it's per-player)
         if (this.mode === 'solo') {
             this.players.forEach(player => {
                 this.ctx.save();
                 this.ctx.translate(player.viewport.x, 0);
-                this.obstacles.forEach(o => o.draw(this.ctx, this.LANE_WIDTH));
-                this.coins.forEach(c => c.draw(this.ctx, this.LANE_WIDTH));
-                this.powerups.forEach(p => p.draw(this.ctx, this.LANE_WIDTH));
                 this.comboEffect.draw(this.ctx, player, this.canvas);
                 this.ctx.restore();
             });
